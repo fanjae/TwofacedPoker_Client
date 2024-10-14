@@ -15,15 +15,16 @@ namespace TwofacedPoker_Client
     {
         private Socket socket;
         private String roomName;
+        private String myID;
         private Thread receiveThread;
         private bool isRunning;
 
-
-        public ChattingRoom_Form(Socket socket, String roomName)
+        public ChattingRoom_Form(Socket socket, String roomName, String myID)
         {
             InitializeComponent();
             this.socket = socket;
             this.Text = roomName;
+            this.myID = myID;
             this.isRunning = true;
 
             socket.ReceiveTimeout = 1000;
@@ -34,6 +35,12 @@ namespace TwofacedPoker_Client
             receiveThread = new Thread(Receive);
             receiveThread.IsBackground = true;
             receiveThread.Start();
+
+            string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", "front10.jpg");
+            string imagePath2 = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", "Back10.jpg");
+            myFront_Card.Image = System.Drawing.Image.FromFile(imagePath);
+            vsFront_Card.Image = System.Drawing.Image.FromFile(imagePath);
+            myBack_Card.Image = System.Drawing.Image.FromFile(imagePath2);
         }
 
         private bool IsSocketConnected(Socket socket)
@@ -138,7 +145,8 @@ namespace TwofacedPoker_Client
         {
             this.Close();
         }
-        private void ChattingRoom_FormClosing(object sender, FormClosingEventArgs e)
+
+        private void ChattingRoom_Form_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (IsSocketConnected(socket))
             {

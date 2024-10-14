@@ -64,6 +64,7 @@ namespace TwofacedPoker_Client
 
                 MessageBox.Show("서버에 연결되었습니다.", "연결 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LogTextBox.Text += "[Log] 서버 연결을 성공하였습니다. \r\n";
+                LogTextBox.Text += client_ID + "\r\n";
 
 
             }
@@ -189,7 +190,7 @@ namespace TwofacedPoker_Client
             }
             else
             {
-                ChattingRoom_Form room = new ChattingRoom_Form(socket, message);
+                ChattingRoom_Form room = new ChattingRoom_Form(socket, message, client_ID);
 
                 room.ShowDialog();
             }
