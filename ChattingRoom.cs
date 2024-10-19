@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -31,7 +32,8 @@ namespace TwofacedPoker_Client
             this.KeyPreview = true;
 
 
-            socket.ReceiveTimeout = 1000;
+            socket.SendTimeout = 0;
+            socket.ReceiveTimeout = 0;
 
             sendTextBox.Select(sendTextBox.Text.Length, 0);
             sendTextBox.ScrollToCaret();
@@ -47,6 +49,7 @@ namespace TwofacedPoker_Client
             myBack_Card.Image = System.Drawing.Image.FromFile(imagePath2);
 
             My_ID_Label.Text = "ID : " + myID;
+
         }
 
         private bool IsSocketConnected(Socket socket)
@@ -72,14 +75,20 @@ namespace TwofacedPoker_Client
         }
         private void ChattingRoom_Form_KeyDown(object sender, KeyEventArgs e)
         {
-            if (this.isGamePlaying == false)
+            if (this.isGamePlaying == false && IsSocketConnected(socket))
             {
                 if (e.KeyCode == Keys.F5 && My_Ready.Text == "<준비>") // 스페이스바를 눌렀을 때
                 {
+                    string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_READY + Constants.READY_DONE;
+                    PacketHandler.SendPacket(socket, request);
+
                     My_Ready.Text = "<완료>";
                 }
                 else if (e.KeyCode == Keys.F5 && My_Ready.Text == "<완료>")
                 {
+                    string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_READY + Constants.READY_NOT_DONE;
+                    PacketHandler.SendPacket(socket, request);
+
                     My_Ready.Text = "<준비>";
                 }
             }
@@ -87,13 +96,15 @@ namespace TwofacedPoker_Client
 
         private void SendButton_Click(object sender, EventArgs e)
         {
-            if (IsSocketConnected(socket))
+            if (sendTextBox.Text != "")
             {
-                string request = sendTextBox.Text;
-                byte[] buffer = Encoding.UTF8.GetBytes(request);
-                socket.Send(buffer);
+                if (IsSocketConnected(socket))
+                {
+                    string request = sendTextBox.Text;
+                    PacketHandler.SendPacket(socket, request);
 
-                sendTextBox.Text = "";
+                    sendTextBox.Text = "";
+                }
             }
         }
 
@@ -106,59 +117,127 @@ namespace TwofacedPoker_Client
             }
         }
 
-        private void Receive()
+        private void RoomHandle(string message)
         {
-            try
+            if ((message.Length >= Constants.ROOM_EVENT.Length + Constants.UPDATE_ID.Length && (message.Substring(Constants.ROOM_EVENT.Length, Constants.UPDATE_ID.Length) == Constants.UPDATE_ID)))
             {
-                while (isRunning)
+                if (InvokeRequired)
                 {
-                    byte[] buffer = new byte[4096];
-                    int recv_length = 0;
-
-                    try
+                    Invoke(new Action(() =>
                     {
-                        recv_length = socket.Receive(buffer);
-                    }
-                    catch (SocketException ex)
+                        Vs_ID_Label.Text = "ID : " + message.Substring(Constants.ROOM_EVENT.Length + Constants.UPDATE_ID.Length);
+                    }));
+                }
+            }
+            else if ((message.Length >= Constants.ROOM_EVENT.Length + Constants.UPDATE_READY_STATE.Length && (message.Substring(Constants.ROOM_EVENT.Length, Constants.UPDATE_READY_STATE.Length) == Constants.UPDATE_READY_STATE)))
+            {
+                string State = message.Substring(Constants.ROOM_EVENT.Length + Constants.UPDATE_READY_STATE.Length);
+                if (State == Constants.READY)
+                {
+                    if (InvokeRequired)
                     {
-                        if (ex.SocketErrorCode == SocketError.TimedOut)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    if (recv_length > 0)
-                    {
-                        string response = Encoding.UTF8.GetString(buffer, 0, recv_length);
-
-
                         Invoke(new Action(() =>
                         {
-                            chattingRoomTextBox.AppendText(response);
-                            chattingRoomTextBox.AppendText("\r\n");
-
+                            Vs_ID_Label.Text = "<준비>";
+                        }));
+                    }
+                }
+                else if (State == Constants.DONE)
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            Vs_ID_Label.Text = "<완료>";
                         }));
                     }
                 }
             }
-            catch (SocketException ex)
+        }
+        private void EventHandle(string message)
+        {
+            try
             {
-                if (isRunning)
+                if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.READY_DONE)
                 {
-                    MessageBox.Show("서버와의 연결이 끊어졌습니다. " + ex.Message);
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            Vs_Ready.Text = "<완료>";
+                        }));
+                    }
+                }
+                else if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.READY_NOT_DONE)
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            Vs_Ready.Text = "<준비>";
+                        }));
+                    }
                 }
             }
-            catch (ObjectDisposedException)
+            catch (Exception e)
             {
-
+                MessageBox.Show(e.Message + " " + message);
             }
-            catch (InvalidOperationException)
+        }
+
+        private void Receive()
+        {
+            string request = Constants.USER_UPDATE;
+            PacketHandler.SendPacket(socket, request);
+            while (isRunning)
             {
-
-            }
+                 try
+                 {
+                    string response = PacketHandler.ReceivePakcet(socket);
+                    if (string.IsNullOrEmpty(response))
+                    {
+                        MessageBox.Show("서버 연결이 종료되었습니다.");
+                        isRunning = false;
+                        socket.Close();
+                        break;
+                    }
+                    else if (response == Constants.EXIT_ROOM_COMPLETE)
+                    {
+                        isRunning = false;
+                        break;
+                    }
+                    else if (response.StartsWith(Constants.ROOM_EVENT)) 
+                    {
+                         RoomHandle(response);
+                    }
+                    else if (response.StartsWith(Constants.GAME_CLIENT_EVENT))
+                    {
+                         EventHandle(response);
+                    }
+                    else
+                    {
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                chattingRoomTextBox.AppendText(response + "\r\n");
+                            }));
+                        }
+                    }
+                 }
+                 catch (SocketException ex)
+                 {
+                     // 소켓 예외 처리
+                     MessageBox.Show("서버 연결이 끊어졌습니다: " + ex.Message);
+                     isRunning = false;
+                 } 
+                 catch (Exception ex)
+                 {
+                    // 일반 예외 처리
+                    MessageBox.Show("오류 발생: " + ex.Message);
+                    isRunning = false;
+                 }
+             }
         }
 
         private void ExitButton_Click(object sender, EventArgs e)
@@ -171,8 +250,7 @@ namespace TwofacedPoker_Client
             if (IsSocketConnected(socket))
             {
                 string request = Constants.EXIT_ROOM;
-                byte[] buffer = Encoding.UTF8.GetBytes(request);
-                socket.Send(buffer);
+                PacketHandler.SendPacket(socket, request);
             }
 
             isRunning = false;

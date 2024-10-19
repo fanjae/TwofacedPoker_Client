@@ -52,13 +52,9 @@ namespace TwofacedPoker_Client
                 socket.Connect(endPoint);
 
                 string request = Constants.LOGIN;
-                byte[] buffer = Encoding.UTF8.GetBytes(request);
-                socket.Send(buffer);
+                PacketHandler.SendPacket(socket, request);
 
-                byte[] recvBuffer = new byte[1024];
-                int recvLength = socket.Receive(recvBuffer);
-
-                string ID = Encoding.UTF8.GetString(recvBuffer, 0, recvLength);
+                string ID = PacketHandler.ReceivePakcet(socket);
                 IDLabel.Text = ID;
                 client_ID = ID.Substring("ID :".Length);
 
@@ -108,12 +104,9 @@ namespace TwofacedPoker_Client
             if (IsSocketConnected(socket))
             {
                 string request = Constants.GET_CHATTING_ROOM;
-                byte[] buffer = Encoding.UTF8.GetBytes(request);
-                socket.Send(buffer);
+                PacketHandler.SendPacket(socket, request);
 
-                byte[] recvBuffer = new byte[1024];
-                int recvLength = socket.Receive(recvBuffer);
-                string rooms = Encoding.UTF8.GetString(recvBuffer, 0, recvLength);
+                string rooms = PacketHandler.ReceivePakcet(socket);
 
                 if (rooms == Constants.NO_ROOM)
                 {
@@ -124,7 +117,23 @@ namespace TwofacedPoker_Client
                 {
                     string[] roomList = rooms.Split('\n', StringSplitOptions.RemoveEmptyEntries);
                     RoomList.Items.Clear();
-                    RoomList.Items.AddRange(roomList);
+
+                    foreach (string room in roomList)
+                    {
+                        string[] roomDetails = room.Split(' ', 2); 
+
+                        if (roomDetails.Length == 2)
+                        {
+                            int roomNumber = int.Parse(roomDetails[0]);  
+                            string roomName = roomDetails[1]; 
+
+                            // RoomInfo 객체 생성
+                            RoomInfo roomInfo = new RoomInfo(roomNumber, roomName);
+
+                            // RoomInfo를 ListBox에 추가
+                            RoomList.Items.Add(roomInfo);
+                        }
+                    }
                 }
             }
         }
@@ -140,25 +149,15 @@ namespace TwofacedPoker_Client
                 if (result == DialogResult.OK)
                 {
                     string request = Constants.CREATE_CHATTING_ROOM + Room.getRoomNameTextBox();
-                    byte[] buffer = Encoding.UTF8.GetBytes(request);
-                    socket.Send(buffer);
+                    PacketHandler.SendPacket(socket, request);
 
-                    byte[] recvBuffer = new byte[1024];
-                    int recvLength = socket.Receive(recvBuffer);
-                    string rooms = Encoding.UTF8.GetString(recvBuffer, 0, recvLength);
+                    string roomNumber = PacketHandler.ReceivePakcet(socket);
 
-                    if (rooms == Constants.EXIST_ROOM)
-                    {
-                        MessageBox.Show("이미 존재하는 방입니다.", "방 생성 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        MessageBox.Show("방 생성이 완료되었습니다.", "방 생성 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        LogTextBox.Text += "[Log] 방을 생성하였습니다. \r\n";
+                    MessageBox.Show("방 생성이 완료되었습니다.", "방 생성 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    LogTextBox.Text += "[Log] 방을 생성하였습니다. \r\n";
 
-                        request = Constants.JOIN_CHATTING_ROOM + rooms;
-                        JoinChattingRoom(request);
-                    }
+                    request = Constants.JOIN_CHATTING_ROOM + roomNumber;
+                    JoinChattingRoom(request);
                 }
             }
         }
@@ -171,18 +170,15 @@ namespace TwofacedPoker_Client
             }
             else if (IsSocketConnected(socket))
             {
-                string request = Constants.JOIN_CHATTING_ROOM + RoomList.SelectedItem.ToString();
+                RoomInfo selectRoom = (RoomInfo)RoomList.SelectedItem;
+                string request = Constants.JOIN_CHATTING_ROOM + selectRoom.RoomNumber.ToString();
                 JoinChattingRoom(request);
             }
         }
         private void JoinChattingRoom(string request)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(request);
-            socket.Send(buffer);
-
-            byte[] recvBuffer = new byte[1024];
-            int recvLength = socket.Receive(recvBuffer);
-            string message = Encoding.UTF8.GetString(recvBuffer, 0, recvLength);
+            PacketHandler.SendPacket(socket, request);
+            string message = PacketHandler.ReceivePakcet(socket);
 
             if (message == Constants.NOT_EXIST_ROOM)
             {

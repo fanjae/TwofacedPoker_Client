@@ -37,7 +37,7 @@
             panel1 = new Panel();
             Vs_Turn = new Label();
             My_Turn = new Label();
-            label7 = new Label();
+            Vs_Ready = new Label();
             My_Ready = new Label();
             My_Chip = new Label();
             Vs_Chip = new Label();
@@ -58,6 +58,8 @@
             panel4 = new Panel();
             panel3 = new Panel();
             panel2 = new Panel();
+            label7 = new Label();
+            label8 = new Label();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)vsFront_Card).BeginInit();
             ((System.ComponentModel.ISupportInitialize)myBack_Card).BeginInit();
@@ -120,9 +122,11 @@
             // panel1
             // 
             panel1.BackColor = Color.PaleGreen;
+            panel1.Controls.Add(label8);
+            panel1.Controls.Add(label7);
             panel1.Controls.Add(Vs_Turn);
             panel1.Controls.Add(My_Turn);
-            panel1.Controls.Add(label7);
+            panel1.Controls.Add(Vs_Ready);
             panel1.Controls.Add(My_Ready);
             panel1.Controls.Add(My_Chip);
             panel1.Controls.Add(Vs_Chip);
@@ -173,17 +177,17 @@
             My_Turn.TabIndex = 24;
             My_Turn.Text = "▶";
             // 
-            // label7
+            // Vs_Ready
             // 
-            label7.AutoSize = true;
-            label7.BackColor = Color.PaleGreen;
-            label7.Font = new Font("맑은 고딕", 14F, FontStyle.Bold, GraphicsUnit.Point, 129);
-            label7.ForeColor = Color.Red;
-            label7.Location = new Point(1239, 85);
-            label7.Name = "label7";
-            label7.Size = new Size(113, 38);
-            label7.TabIndex = 23;
-            label7.Text = "<준비>";
+            Vs_Ready.AutoSize = true;
+            Vs_Ready.BackColor = Color.PaleGreen;
+            Vs_Ready.Font = new Font("맑은 고딕", 14F, FontStyle.Bold, GraphicsUnit.Point, 129);
+            Vs_Ready.ForeColor = Color.Red;
+            Vs_Ready.Location = new Point(1239, 85);
+            Vs_Ready.Name = "Vs_Ready";
+            Vs_Ready.Size = new Size(113, 38);
+            Vs_Ready.TabIndex = 23;
+            Vs_Ready.Text = "<준비>";
             // 
             // My_Ready
             // 
@@ -279,7 +283,7 @@
             vsFront_Card.BackgroundImageLayout = ImageLayout.Stretch;
             vsFront_Card.Image = (Image)resources.GetObject("vsFront_Card.Image");
             vsFront_Card.InitialImage = null;
-            vsFront_Card.Location = new Point(122, 149);
+            vsFront_Card.Location = new Point(122, 85);
             vsFront_Card.Name = "vsFront_Card";
             vsFront_Card.Size = new Size(149, 179);
             vsFront_Card.TabIndex = 14;
@@ -394,6 +398,26 @@
             panel2.Size = new Size(182, 122);
             panel2.TabIndex = 0;
             // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            label7.Location = new Point(137, 643);
+            label7.Name = "label7";
+            label7.Size = new Size(151, 38);
+            label7.TabIndex = 26;
+            label7.Text = "<내 카드>";
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            label8.Location = new Point(107, 27);
+            label8.Name = "label8";
+            label8.Size = new Size(179, 38);
+            label8.TabIndex = 27;
+            label8.Text = "<상대 카드>";
+            // 
             // ChattingRoom_Form
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -445,9 +469,11 @@
         private Label Vs_Chip;
         private Label label5;
         private Label My_Chip;
-        private Label label7;
+        private Label Vs_Ready;
         private Label My_Ready;
         private Label Vs_Turn;
         private Label My_Turn;
+        private Label label7;
+        private Label label8;
     }
 }
