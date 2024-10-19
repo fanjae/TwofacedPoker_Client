@@ -26,10 +26,25 @@ namespace TwofacedPoker_Client
         public const string READY = "READY";
         public const string DONE = "DONE";
 
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
         public const string GAME_CLIENT_EVENT = "/Game_Client_Event ";
         public const string GAME_READY = "Game_Ready ";
         public const string READY_DONE = "Ready_Done";
         public const string READY_NOT_DONE = "Ready_Not_Done";
         public const string LOAD_PLAYER = "Load_Player ";
+<<<<<<< HEAD
+=======
+        public const string GAME_PRE_CALL = "Game_Pre_Call";
+        public const string GAME_PRE_LOAD_PLAYER = "Game_Pre_Load_Player";
+        public const string GAME_PRE_LOAD_ID = "Game_Pre_Load ID ";
+        public const string GAME_PRE_LOAD_READY = "Game_Pre_Load Ready";
+        public const string GAME_PRE_LOAD_DONE = "Game_Pre_Load Done";
+        public const string GAME_PRE_LOAD_ID_DONE = "Pre_Load_ID_Done ";
+        public const string GAME_PRE_LOAD_READY_DONE = "Pre_Load_Ready_Done";
+        public const string GAME_PRE_LOAD_DONE_DONE = "Pre_Load_Done_Done";
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
     }
 }

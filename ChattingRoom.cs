@@ -50,6 +50,11 @@ namespace TwofacedPoker_Client
 
             My_ID_Label.Text = "ID : " + myID;
 
+<<<<<<< HEAD
+=======
+            Pre_Call();            
+
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
         }
 
         private bool IsSocketConnected(Socket socket)
@@ -80,14 +85,24 @@ namespace TwofacedPoker_Client
                 if (e.KeyCode == Keys.F5 && My_Ready.Text == "<준비>") // 스페이스바를 눌렀을 때
                 {
                     string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_READY + Constants.READY_DONE;
+<<<<<<< HEAD
                     PacketHandler.SendPacket(socket, request);
+=======
+                    byte[] buffer = Encoding.UTF8.GetBytes(request);
+                    socket.Send(buffer);
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
 
                     My_Ready.Text = "<완료>";
                 }
                 else if (e.KeyCode == Keys.F5 && My_Ready.Text == "<완료>")
                 {
                     string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_READY + Constants.READY_NOT_DONE;
+<<<<<<< HEAD
                     PacketHandler.SendPacket(socket, request);
+=======
+                    byte[] buffer = Encoding.UTF8.GetBytes(request);
+                    socket.Send(buffer);
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
 
                     My_Ready.Text = "<준비>";
                 }
@@ -117,13 +132,108 @@ namespace TwofacedPoker_Client
             }
         }
 
+<<<<<<< HEAD
         private void RoomHandle(string message)
+=======
+        private void EventHandle(string message)
+        {
+            MessageBox.Show("Message: " + message);
+            MessageBox.Show("Substring: " + message.Substring(Constants.GAME_CLIENT_EVENT.Length));
+            MessageBox.Show("Message_length : " + message.Length.ToString());
+            try
+            {
+                if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.READY_DONE)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        Vs_Ready.Text = "<완료>";
+                    }));
+                }
+                else if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.READY_NOT_DONE)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        Vs_Ready.Text = "<준비>";
+                    }));
+                }
+                else if (message.Length >= Constants.GAME_CLIENT_EVENT.Length + Constants.LOAD_PLAYER.Length &&  message.Substring(Constants.GAME_CLIENT_EVENT.Length, Constants.LOAD_PLAYER.Length) == Constants.LOAD_PLAYER)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        Vs_ID_Label.Text = "ID : " + message.Substring(Constants.GAME_CLIENT_EVENT.Length + Constants.LOAD_PLAYER.Length);
+                    }));
+                }
+                else if (message.Length >= Constants.GAME_CLIENT_EVENT.Length + Constants.GAME_PRE_LOAD_PLAYER.Length && message.Substring(Constants.GAME_CLIENT_EVENT.Length, Constants.GAME_PRE_LOAD_PLAYER.Length) == Constants.GAME_PRE_LOAD_PLAYER)
+                {
+
+                    string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_PRE_LOAD_ID + My_ID_Label.Text.Substring(6);
+                    byte[] buffer = Encoding.UTF8.GetBytes(request);
+                    socket.Send(buffer);
+
+                    if (My_Ready.Text == "<준비>")
+                    {
+                        request = Constants.GAME_CLIENT_EVENT + Constants.GAME_PRE_LOAD_READY;
+                        buffer = Encoding.UTF8.GetBytes(request);
+                        socket.Send(buffer);
+                    }
+                    else
+                    {
+                        request = Constants.GAME_CLIENT_EVENT + Constants.GAME_PRE_LOAD_DONE;
+                        buffer = Encoding.UTF8.GetBytes(request);
+                        socket.Send(buffer);
+                    }
+                }
+                else if (message.Length >= Constants.GAME_CLIENT_EVENT.Length + Constants.GAME_PRE_LOAD_ID_DONE.Length && message.Substring(Constants.GAME_CLIENT_EVENT.Length, Constants.GAME_PRE_LOAD_ID_DONE.Length) == Constants.GAME_PRE_LOAD_ID_DONE)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        Vs_ID_Label.Text = "ID : " + message.Substring(Constants.GAME_CLIENT_EVENT.Length + Constants.GAME_PRE_LOAD_ID_DONE.Length);
+                    }));
+                }
+                else if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.GAME_PRE_LOAD_READY_DONE)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        Vs_Ready.Text = "<준비>";
+
+                    }));
+                }
+                else if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.GAME_PRE_LOAD_DONE_DONE)
+                {
+                    Invoke(new Action(() =>
+                    {
+                        Vs_Ready.Text = "<완료>";
+
+                    }));
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message + " " + message);
+            }
+        }
+
+        private void Pre_Call()
+        {
+            string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_PRE_CALL;
+            byte[] buffer = Encoding.UTF8.GetBytes(request);
+            socket.Send(buffer);
+        }
+        private void Receive()
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
         {
             if ((message.Length >= Constants.ROOM_EVENT.Length + Constants.UPDATE_ID.Length && (message.Substring(Constants.ROOM_EVENT.Length, Constants.UPDATE_ID.Length) == Constants.UPDATE_ID)))
             {
                 if (InvokeRequired)
                 {
+<<<<<<< HEAD
                     Invoke(new Action(() =>
+=======
+                    byte[] buffer = new byte[1024];
+                    int recv_length = 0;
+
+                    try
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
                     {
                         Vs_ID_Label.Text = "ID : " + message.Substring(Constants.ROOM_EVENT.Length + Constants.UPDATE_ID.Length);
                     }));
@@ -136,6 +246,28 @@ namespace TwofacedPoker_Client
                 {
                     if (InvokeRequired)
                     {
+<<<<<<< HEAD
+=======
+                        if (ex.SocketErrorCode == SocketError.TimedOut)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                    if (recv_length > 0)
+                    {
+                        string response = Encoding.UTF8.GetString(buffer, 0, recv_length);
+                        if (response.StartsWith(Constants.GAME_CLIENT_EVENT))
+                        {
+                            EventHandle(response);
+                            continue;
+                        }
+
+
+>>>>>>> 3e9497634cc7449ac557eb1edcd6479bd222cda6
                         Invoke(new Action(() =>
                         {
                             Vs_ID_Label.Text = "<준비>";
