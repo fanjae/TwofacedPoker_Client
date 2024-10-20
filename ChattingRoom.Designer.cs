@@ -35,6 +35,14 @@
             ExitButton = new Button();
             Vs_ID_Label = new Label();
             panel1 = new Panel();
+            Bet_Chip = new Button();
+            Chip_count = new TextBox();
+            Dealer_Label = new Label();
+            panel6 = new Panel();
+            Dealer_Chip = new Label();
+            System_Message = new Label();
+            label8 = new Label();
+            label7 = new Label();
             Vs_Turn = new Label();
             My_Turn = new Label();
             Vs_Ready = new Label();
@@ -43,9 +51,9 @@
             Vs_Chip = new Label();
             label5 = new Label();
             Label6 = new Label();
-            button3 = new Button();
-            button2 = new Button();
-            button1 = new Button();
+            Both_Bet_Button = new Button();
+            Back_Bet_Button = new Button();
+            Front_Bet_Button = new Button();
             vsFront_Card = new PictureBox();
             myBack_Card = new PictureBox();
             My_ID_Label = new Label();
@@ -55,15 +63,23 @@
             label2 = new Label();
             label1 = new Label();
             panel5 = new Panel();
+            My_Back_Chip = new Label();
             panel4 = new Panel();
+            My_Front_Chip = new Label();
             panel3 = new Panel();
+            Vs_Front_Chip = new Label();
             panel2 = new Panel();
-            label7 = new Label();
-            label8 = new Label();
+            Vs_Back_Chip = new Label();
+            label10 = new Label();
             panel1.SuspendLayout();
+            panel6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)vsFront_Card).BeginInit();
             ((System.ComponentModel.ISupportInitialize)myBack_Card).BeginInit();
             ((System.ComponentModel.ISupportInitialize)myFront_Card).BeginInit();
+            panel5.SuspendLayout();
+            panel4.SuspendLayout();
+            panel3.SuspendLayout();
+            panel2.SuspendLayout();
             SuspendLayout();
             // 
             // sendTextBox
@@ -122,6 +138,11 @@
             // panel1
             // 
             panel1.BackColor = Color.PaleGreen;
+            panel1.Controls.Add(Bet_Chip);
+            panel1.Controls.Add(Chip_count);
+            panel1.Controls.Add(Dealer_Label);
+            panel1.Controls.Add(panel6);
+            panel1.Controls.Add(System_Message);
             panel1.Controls.Add(label8);
             panel1.Controls.Add(label7);
             panel1.Controls.Add(Vs_Turn);
@@ -132,9 +153,9 @@
             panel1.Controls.Add(Vs_Chip);
             panel1.Controls.Add(label5);
             panel1.Controls.Add(Label6);
-            panel1.Controls.Add(button3);
-            panel1.Controls.Add(button2);
-            panel1.Controls.Add(button1);
+            panel1.Controls.Add(Both_Bet_Button);
+            panel1.Controls.Add(Back_Bet_Button);
+            panel1.Controls.Add(Front_Bet_Button);
             panel1.Controls.Add(vsFront_Card);
             panel1.Controls.Add(myBack_Card);
             panel1.Controls.Add(My_ID_Label);
@@ -152,6 +173,85 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(1493, 688);
             panel1.TabIndex = 7;
+            // 
+            // Bet_Chip
+            // 
+            Bet_Chip.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Bet_Chip.Location = new Point(752, 635);
+            Bet_Chip.Name = "Bet_Chip";
+            Bet_Chip.Size = new Size(143, 45);
+            Bet_Chip.TabIndex = 8;
+            Bet_Chip.Text = "베팅";
+            Bet_Chip.UseVisualStyleBackColor = true;
+            // 
+            // Chip_count
+            // 
+            Chip_count.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Chip_count.Location = new Point(590, 636);
+            Chip_count.Name = "Chip_count";
+            Chip_count.Size = new Size(141, 45);
+            Chip_count.TabIndex = 8;
+            // 
+            // Dealer_Label
+            // 
+            Dealer_Label.AutoSize = true;
+            Dealer_Label.BackColor = Color.PaleGreen;
+            Dealer_Label.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Dealer_Label.Location = new Point(1015, 207);
+            Dealer_Label.Name = "Dealer_Label";
+            Dealer_Label.Size = new Size(99, 38);
+            Dealer_Label.TabIndex = 32;
+            Dealer_Label.Text = "Dealer";
+            // 
+            // panel6
+            // 
+            panel6.BackColor = Color.FromArgb(192, 255, 255);
+            panel6.Controls.Add(Dealer_Chip);
+            panel6.Location = new Point(976, 248);
+            panel6.Name = "panel6";
+            panel6.Size = new Size(182, 122);
+            panel6.TabIndex = 31;
+            // 
+            // Dealer_Chip
+            // 
+            Dealer_Chip.AutoSize = true;
+            Dealer_Chip.BackColor = Color.FromArgb(192, 255, 255);
+            Dealer_Chip.Font = new Font("맑은 고딕", 20F, FontStyle.Bold, GraphicsUnit.Point, 129);
+            Dealer_Chip.Location = new Point(68, 32);
+            Dealer_Chip.Name = "Dealer_Chip";
+            Dealer_Chip.Size = new Size(46, 54);
+            Dealer_Chip.TabIndex = 30;
+            Dealer_Chip.Text = "0";
+            // 
+            // System_Message
+            // 
+            System_Message.AutoSize = true;
+            System_Message.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            System_Message.Location = new Point(434, 27);
+            System_Message.Name = "System_Message";
+            System_Message.Size = new Size(195, 38);
+            System_Message.TabIndex = 28;
+            System_Message.Text = "<Message : >";
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            label8.Location = new Point(107, 27);
+            label8.Name = "label8";
+            label8.Size = new Size(179, 38);
+            label8.TabIndex = 27;
+            label8.Text = "<상대 카드>";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            label7.Location = new Point(137, 643);
+            label7.Name = "label7";
+            label7.Size = new Size(151, 38);
+            label7.TabIndex = 26;
+            label7.Text = "<내 카드>";
             // 
             // Vs_Turn
             // 
@@ -245,38 +345,38 @@
             Label6.TabIndex = 18;
             Label6.Text = "Chip :";
             // 
-            // button3
+            // Both_Bet_Button
             // 
-            button3.BackColor = Color.Ivory;
-            button3.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            button3.Location = new Point(616, 510);
-            button3.Name = "button3";
-            button3.Size = new Size(91, 107);
-            button3.TabIndex = 17;
-            button3.Text = "양면";
-            button3.UseVisualStyleBackColor = false;
+            Both_Bet_Button.BackColor = Color.Ivory;
+            Both_Bet_Button.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Both_Bet_Button.Location = new Point(616, 510);
+            Both_Bet_Button.Name = "Both_Bet_Button";
+            Both_Bet_Button.Size = new Size(91, 107);
+            Both_Bet_Button.TabIndex = 17;
+            Both_Bet_Button.Text = "양면";
+            Both_Bet_Button.UseVisualStyleBackColor = false;
             // 
-            // button2
+            // Back_Bet_Button
             // 
-            button2.BackColor = Color.Ivory;
-            button2.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            button2.Location = new Point(756, 510);
-            button2.Name = "button2";
-            button2.Size = new Size(91, 107);
-            button2.TabIndex = 16;
-            button2.Text = "뒷면";
-            button2.UseVisualStyleBackColor = false;
+            Back_Bet_Button.BackColor = Color.Ivory;
+            Back_Bet_Button.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Back_Bet_Button.Location = new Point(756, 510);
+            Back_Bet_Button.Name = "Back_Bet_Button";
+            Back_Bet_Button.Size = new Size(91, 107);
+            Back_Bet_Button.TabIndex = 16;
+            Back_Bet_Button.Text = "뒷면";
+            Back_Bet_Button.UseVisualStyleBackColor = false;
             // 
-            // button1
+            // Front_Bet_Button
             // 
-            button1.BackColor = Color.Ivory;
-            button1.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            button1.Location = new Point(475, 510);
-            button1.Name = "button1";
-            button1.Size = new Size(91, 107);
-            button1.TabIndex = 15;
-            button1.Text = "앞면";
-            button1.UseVisualStyleBackColor = false;
+            Front_Bet_Button.BackColor = Color.Ivory;
+            Front_Bet_Button.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Front_Bet_Button.Location = new Point(475, 510);
+            Front_Bet_Button.Name = "Front_Bet_Button";
+            Front_Bet_Button.Size = new Size(91, 107);
+            Front_Bet_Button.TabIndex = 15;
+            Front_Bet_Button.Text = "앞면";
+            Front_Bet_Button.UseVisualStyleBackColor = false;
             // 
             // vsFront_Card
             // 
@@ -369,61 +469,101 @@
             // panel5
             // 
             panel5.BackColor = Color.FromArgb(192, 255, 255);
+            panel5.Controls.Add(My_Back_Chip);
             panel5.Location = new Point(720, 316);
             panel5.Name = "panel5";
             panel5.Size = new Size(182, 122);
             panel5.TabIndex = 3;
             // 
+            // My_Back_Chip
+            // 
+            My_Back_Chip.AutoSize = true;
+            My_Back_Chip.BackColor = Color.FromArgb(192, 255, 255);
+            My_Back_Chip.Font = new Font("맑은 고딕", 20F, FontStyle.Bold, GraphicsUnit.Point, 129);
+            My_Back_Chip.Location = new Point(68, 37);
+            My_Back_Chip.Name = "My_Back_Chip";
+            My_Back_Chip.Size = new Size(46, 54);
+            My_Back_Chip.TabIndex = 29;
+            My_Back_Chip.Text = "0";
+            // 
             // panel4
             // 
             panel4.BackColor = Color.FromArgb(192, 255, 255);
+            panel4.Controls.Add(My_Front_Chip);
             panel4.Location = new Point(425, 316);
             panel4.Name = "panel4";
             panel4.Size = new Size(182, 122);
             panel4.TabIndex = 2;
             // 
+            // My_Front_Chip
+            // 
+            My_Front_Chip.AutoSize = true;
+            My_Front_Chip.BackColor = Color.FromArgb(192, 255, 255);
+            My_Front_Chip.Font = new Font("맑은 고딕", 20F, FontStyle.Bold, GraphicsUnit.Point, 129);
+            My_Front_Chip.Location = new Point(67, 33);
+            My_Front_Chip.Name = "My_Front_Chip";
+            My_Front_Chip.Size = new Size(46, 54);
+            My_Front_Chip.TabIndex = 30;
+            My_Front_Chip.Text = "0";
+            // 
             // panel3
             // 
             panel3.BackColor = Color.FromArgb(192, 255, 255);
+            panel3.Controls.Add(Vs_Front_Chip);
             panel3.Location = new Point(720, 149);
             panel3.Name = "panel3";
             panel3.Size = new Size(182, 122);
             panel3.TabIndex = 1;
             // 
+            // Vs_Front_Chip
+            // 
+            Vs_Front_Chip.AutoSize = true;
+            Vs_Front_Chip.BackColor = Color.FromArgb(192, 255, 255);
+            Vs_Front_Chip.Font = new Font("맑은 고딕", 20F, FontStyle.Bold, GraphicsUnit.Point, 129);
+            Vs_Front_Chip.Location = new Point(68, 32);
+            Vs_Front_Chip.Name = "Vs_Front_Chip";
+            Vs_Front_Chip.Size = new Size(46, 54);
+            Vs_Front_Chip.TabIndex = 30;
+            Vs_Front_Chip.Text = "0";
+            // 
             // panel2
             // 
             panel2.BackColor = Color.FromArgb(192, 255, 255);
+            panel2.Controls.Add(Vs_Back_Chip);
+            panel2.Controls.Add(label10);
             panel2.Location = new Point(422, 149);
             panel2.Name = "panel2";
             panel2.Size = new Size(182, 122);
             panel2.TabIndex = 0;
             // 
-            // label7
+            // Vs_Back_Chip
             // 
-            label7.AutoSize = true;
-            label7.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            label7.Location = new Point(137, 643);
-            label7.Name = "label7";
-            label7.Size = new Size(151, 38);
-            label7.TabIndex = 26;
-            label7.Text = "<내 카드>";
+            Vs_Back_Chip.AutoSize = true;
+            Vs_Back_Chip.BackColor = Color.FromArgb(192, 255, 255);
+            Vs_Back_Chip.Font = new Font("맑은 고딕", 20F, FontStyle.Bold, GraphicsUnit.Point, 129);
+            Vs_Back_Chip.Location = new Point(71, 32);
+            Vs_Back_Chip.Name = "Vs_Back_Chip";
+            Vs_Back_Chip.Size = new Size(46, 54);
+            Vs_Back_Chip.TabIndex = 31;
+            Vs_Back_Chip.Text = "0";
             // 
-            // label8
+            // label10
             // 
-            label8.AutoSize = true;
-            label8.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            label8.Location = new Point(107, 27);
-            label8.Name = "label8";
-            label8.Size = new Size(179, 38);
-            label8.TabIndex = 27;
-            label8.Text = "<상대 카드>";
+            label10.AutoSize = true;
+            label10.BackColor = Color.FromArgb(192, 255, 255);
+            label10.Font = new Font("맑은 고딕", 20F, FontStyle.Bold, GraphicsUnit.Point, 129);
+            label10.Location = new Point(70, 28);
+            label10.Name = "label10";
+            label10.Size = new Size(46, 54);
+            label10.TabIndex = 32;
+            label10.Text = "0";
             // 
             // ChattingRoom_Form
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(2465, 741);
+            ClientSize = new Size(2466, 736);
             Controls.Add(ExitButton);
             Controls.Add(SendButton);
             Controls.Add(chattingRoomTextBox);
@@ -435,9 +575,19 @@
             KeyDown += ChattingRoom_Form_KeyDown;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            panel6.ResumeLayout(false);
+            panel6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)vsFront_Card).EndInit();
             ((System.ComponentModel.ISupportInitialize)myBack_Card).EndInit();
             ((System.ComponentModel.ISupportInitialize)myFront_Card).EndInit();
+            panel5.ResumeLayout(false);
+            panel5.PerformLayout();
+            panel4.ResumeLayout(false);
+            panel4.PerformLayout();
+            panel3.ResumeLayout(false);
+            panel3.PerformLayout();
+            panel2.ResumeLayout(false);
+            panel2.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -461,9 +611,9 @@
         private Panel panel3;
         private PictureBox vsFront_Card;
         private PictureBox myBack_Card;
-        private Button button3;
-        private Button button2;
-        private Button button1;
+        private Button Both_Bet_Button;
+        private Button Back_Bet_Button;
+        private Button Front_Bet_Button;
         private Label Label6;
         private Label My_ID_Label;
         private Label Vs_Chip;
@@ -475,5 +625,16 @@
         private Label My_Turn;
         private Label label7;
         private Label label8;
+        private Label System_Message;
+        private Label My_Back_Chip;
+        private Label Dealer_Label;
+        private Panel panel6;
+        private Label Dealer_Chip;
+        private Label My_Front_Chip;
+        private Label Vs_Front_Chip;
+        private Label Vs_Back_Chip;
+        private Label label10;
+        private TextBox Chip_count;
+        private Button Bet_Chip;
     }
 }

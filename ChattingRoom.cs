@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace TwofacedPoker_Client
 {
@@ -20,6 +21,7 @@ namespace TwofacedPoker_Client
         private Thread receiveThread;
         private bool isRunning;
         private bool isGamePlaying;
+        private int bet_type;
 
         public ChattingRoom_Form(Socket socket, String roomName, String myID)
         {
@@ -30,6 +32,7 @@ namespace TwofacedPoker_Client
             this.isRunning = true;
             this.isGamePlaying = false;
             this.KeyPreview = true;
+            this.bet_type = 0;
 
 
             socket.SendTimeout = 0;
@@ -77,19 +80,24 @@ namespace TwofacedPoker_Client
         {
             if (this.isGamePlaying == false && IsSocketConnected(socket))
             {
-                if (e.KeyCode == Keys.F5 && My_Ready.Text == "<준비>") // 스페이스바를 눌렀을 때
+                if (e.KeyCode == Keys.F5 && My_Ready.Text == "<준비>") // F5를 눌렀을때
                 {
-                    string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_READY + Constants.READY_DONE;
+                    string request = Constants.ROOM_EVENT + Constants.USER_READY_STATE + Constants.DONE;
                     PacketHandler.SendPacket(socket, request);
 
                     My_Ready.Text = "<완료>";
                 }
                 else if (e.KeyCode == Keys.F5 && My_Ready.Text == "<완료>")
                 {
-                    string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_READY + Constants.READY_NOT_DONE;
+                    string request = Constants.ROOM_EVENT + Constants.USER_READY_STATE + Constants.READY;
                     PacketHandler.SendPacket(socket, request);
 
                     My_Ready.Text = "<준비>";
+                }
+                else if (e.KeyCode == Keys.F6 && My_Ready.Text == "<완료>" && Vs_Ready.Text == "<완료>") // F6를 눌렀을때
+                {
+                    string request = Constants.GAME_CLIENT_EVENT + Constants.GAME_START;
+                    PacketHandler.SendPacket(socket, request);
                 }
             }
         }
@@ -119,56 +127,20 @@ namespace TwofacedPoker_Client
 
         private void RoomHandle(string message)
         {
-            if ((message.Length >= Constants.ROOM_EVENT.Length + Constants.UPDATE_ID.Length && (message.Substring(Constants.ROOM_EVENT.Length, Constants.UPDATE_ID.Length) == Constants.UPDATE_ID)))
+            if ((message.Length >= Constants.UPDATE_ID.Length && (message.Substring(0, Constants.UPDATE_ID.Length) == Constants.UPDATE_ID)))
             {
                 if (InvokeRequired)
                 {
                     Invoke(new Action(() =>
                     {
-                        Vs_ID_Label.Text = "ID : " + message.Substring(Constants.ROOM_EVENT.Length + Constants.UPDATE_ID.Length);
+                        Vs_ID_Label.Text = "ID : " + message.Substring(Constants.UPDATE_ID.Length);
                     }));
                 }
             }
-            else if ((message.Length >= Constants.ROOM_EVENT.Length + Constants.UPDATE_READY_STATE.Length && (message.Substring(Constants.ROOM_EVENT.Length, Constants.UPDATE_READY_STATE.Length) == Constants.UPDATE_READY_STATE)))
+            else if ((message.Length >= Constants.UPDATE_READY_STATE.Length && (message.Substring(0, Constants.UPDATE_READY_STATE.Length) == Constants.UPDATE_READY_STATE)))
             {
-                string State = message.Substring(Constants.ROOM_EVENT.Length + Constants.UPDATE_READY_STATE.Length);
+                string State = message.Substring(Constants.UPDATE_READY_STATE.Length);
                 if (State == Constants.READY)
-                {
-                    if (InvokeRequired)
-                    {
-                        Invoke(new Action(() =>
-                        {
-                            Vs_ID_Label.Text = "<준비>";
-                        }));
-                    }
-                }
-                else if (State == Constants.DONE)
-                {
-                    if (InvokeRequired)
-                    {
-                        Invoke(new Action(() =>
-                        {
-                            Vs_ID_Label.Text = "<완료>";
-                        }));
-                    }
-                }
-            }
-        }
-        private void EventHandle(string message)
-        {
-            try
-            {
-                if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.READY_DONE)
-                {
-                    if (InvokeRequired)
-                    {
-                        Invoke(new Action(() =>
-                        {
-                            Vs_Ready.Text = "<완료>";
-                        }));
-                    }
-                }
-                else if (message.Substring(Constants.GAME_CLIENT_EVENT.Length) == Constants.READY_NOT_DONE)
                 {
                     if (InvokeRequired)
                     {
@@ -178,6 +150,86 @@ namespace TwofacedPoker_Client
                         }));
                     }
                 }
+                else if (State == Constants.DONE)
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            Vs_Ready.Text = "<완료>";
+                        }));
+                    }
+                }
+            }
+        }
+        private void EventHandle(string message)
+        {
+            try
+            {
+                if ((message.Length >= Constants.START.Length && (message.Substring(0, Constants.START.Length) == Constants.START)))
+                {
+                    string State = message.Substring(Constants.START.Length);
+                    if (State == Constants.READY)
+                    {
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                System_Message.Text = "<System> : 모든 유저가 시작을 하지 않은 상태입니다.";
+                            }));
+                        }
+                    }
+                    else if (State == Constants.DONE)
+                    {
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                System_Message.Text = "<System> : 게임을 시작합니다.";
+                                this.isGamePlaying = true;
+                            }));
+                        }
+                    }
+                }
+                else if ((message.Length >= Constants.GAME_INIT.Length && (message.Substring(0, Constants.GAME_INIT.Length) == Constants.GAME_INIT)))
+                {
+                    InitTableChipSetting();
+                }
+                if ((message.Length >= Constants.TURN.Length && (message.Substring(0, Constants.TURN.Length) == Constants.TURN)))
+                {
+                    string State = message.Substring(Constants.TURN.Length);
+                    if (State == Constants.MY)
+                    {
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                System_Message.Text = "<System> : 당신의 차례입니다.";
+                                My_Turn.Visible = true;
+                                Vs_Turn.Visible = false;
+                                Front_Bet_Button.Enabled = true;
+                                Both_Bet_Button.Enabled = true;
+                                Back_Bet_Button.Enabled = true;
+                            }));
+                        }
+                    }
+                    else if (State == Constants.OTHER)
+                    {
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                System_Message.Text = "<System> : 상대방의 차례입니다.";
+                                My_Turn.Visible = false;
+                                Vs_Turn.Visible = true;
+                                Front_Bet_Button.Enabled = false;
+                                Both_Bet_Button.Enabled = false;
+                                Back_Bet_Button.Enabled = false;
+                            }));
+                        }
+                    }
+                }
+
             }
             catch (Exception e)
             {
@@ -208,11 +260,11 @@ namespace TwofacedPoker_Client
                     }
                     else if (response.StartsWith(Constants.ROOM_EVENT)) 
                     {
-                         RoomHandle(response);
+                         RoomHandle(response.Substring(Constants.ROOM_EVENT.Length));
                     }
                     else if (response.StartsWith(Constants.GAME_CLIENT_EVENT))
                     {
-                         EventHandle(response);
+                         EventHandle(response.Substring(Constants.GAME_CLIENT_EVENT.Length));
                     }
                     else
                     {
@@ -242,7 +294,10 @@ namespace TwofacedPoker_Client
 
         private void ExitButton_Click(object sender, EventArgs e)
         {
-            this.Close();
+            if (!isGamePlaying)
+            {
+                this.Close();
+            }
         }
 
         private void ChattingRoom_Form_FormClosing(object sender, FormClosingEventArgs e)
@@ -258,6 +313,15 @@ namespace TwofacedPoker_Client
             {
                 receiveThread.Join();
             }
+        }
+        private void InitTableChipSetting()
+        {
+            My_Front_Chip.Text = "0";
+            My_Back_Chip.Text = "0";
+            Vs_Front_Chip.Text = "0";
+            Vs_Back_Chip.Text = "0";
+            Dealer_Chip.Text = "0";
+            bet_type = 0;
         }
     }
 }
