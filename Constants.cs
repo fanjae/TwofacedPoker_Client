@@ -35,5 +35,13 @@ namespace TwofacedPoker_Client
         public const string TURN = "Turn ";
         public const string MY = "My";
         public const string OTHER = "Other";
+
+        public const string BASIC_BETTING = "Basic_Betting";
+        public const string CHIP_UPDATE = " Chip_Update ";
+        public const string CARD_UPDATE = " Card_Update ";
+        public const string FRONT = "Front ";
+        public const string BACK = "Back ";
+        public const string BOTH = "Both ";
+        public const string BETTING = " Betting ";
     }
 }

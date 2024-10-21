@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net.Sockets;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,6 +23,9 @@ namespace TwofacedPoker_Client
         private bool isRunning;
         private bool isGamePlaying;
         private int bet_type;
+        private int temp_bet_type;
+        private int chips = 0;
+        private int vs_chips = 0;
 
         public ChattingRoom_Form(Socket socket, String roomName, String myID)
         {
@@ -33,6 +37,8 @@ namespace TwofacedPoker_Client
             this.isGamePlaying = false;
             this.KeyPreview = true;
             this.bet_type = 0;
+            this.chips = 0;
+            this.vs_chips = 0;
 
 
             socket.SendTimeout = 0;
@@ -45,7 +51,7 @@ namespace TwofacedPoker_Client
             receiveThread.IsBackground = true;
             receiveThread.Start();
 
-            string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", "front10.jpg");
+            string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", "Front10.jpg");
             string imagePath2 = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", "Back10.jpg");
             myFront_Card.Image = System.Drawing.Image.FromFile(imagePath);
             vsFront_Card.Image = System.Drawing.Image.FromFile(imagePath);
@@ -195,7 +201,7 @@ namespace TwofacedPoker_Client
                 {
                     InitTableChipSetting();
                 }
-                if ((message.Length >= Constants.TURN.Length && (message.Substring(0, Constants.TURN.Length) == Constants.TURN)))
+                else if ((message.Length >= Constants.TURN.Length && (message.Substring(0, Constants.TURN.Length) == Constants.TURN)))
                 {
                     string State = message.Substring(Constants.TURN.Length);
                     if (State == Constants.MY)
@@ -229,11 +235,87 @@ namespace TwofacedPoker_Client
                         }
                     }
                 }
+                else if ((message.Length >= Constants.BASIC_BETTING.Length && (message.Substring(0, Constants.BASIC_BETTING.Length) == Constants.BASIC_BETTING)))
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            Dealer_Chip.Text = "2";
+                        }));
+                    }
+                }
+                else if ((message.Length >= Constants.MY.Length + Constants.CHIP_UPDATE.Length && (message.Substring(0, Constants.MY.Length + Constants.CHIP_UPDATE.Length) == Constants.MY + Constants.CHIP_UPDATE)))
+                {
+                    string chip_count = message.Substring(Constants.MY.Length + Constants.CHIP_UPDATE.Length);
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            My_Chip.Text = chip_count;
+                            chips = int.Parse(chip_count);
+                        }));
+                    }
 
+                }
+                else if ((message.Length >= Constants.OTHER.Length + Constants.CHIP_UPDATE.Length && (message.Substring(0, Constants.OTHER.Length + Constants.CHIP_UPDATE.Length) == Constants.OTHER + Constants.CHIP_UPDATE)))
+                {
+                    string chip_count = message.Substring(Constants.OTHER.Length + Constants.CHIP_UPDATE.Length);
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            Vs_Chip.Text = chip_count;
+                            vs_chips = int.Parse(chip_count);
+                        }));
+                    }
+                }
+                else if ((message.Length >= Constants.MY.Length + Constants.CARD_UPDATE.Length && (message.Substring(0, Constants.MY.Length + Constants.CARD_UPDATE.Length) == Constants.MY + Constants.CARD_UPDATE)))
+                {
+                    string imagePath;
+                    string valuePath;
+                    string front_or_back = message.Substring(Constants.MY.Length + Constants.CARD_UPDATE.Length);
+                    if (front_or_back.Length >= Constants.FRONT.Length && (front_or_back.Substring(0, Constants.FRONT.Length) == Constants.FRONT))
+                    {
+                        valuePath = Constants.FRONT + front_or_back.Substring(Constants.FRONT.Length) + ".jpg";
+                        imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", valuePath);
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                myFront_Card.Image = System.Drawing.Image.FromFile(imagePath);
+                            }));
+                        }
+                    }
+                    else if (front_or_back.Length >= Constants.BACK.Length && (front_or_back.Substring(0, Constants.BACK.Length) == Constants.BACK))
+                    {
+                        valuePath = Constants.BACK + front_or_back.Substring(Constants.BACK.Length) + ".jpg";
+                        imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", valuePath);
+                        if (InvokeRequired)
+                        {
+                            Invoke(new Action(() =>
+                            {
+                                myBack_Card.Image = System.Drawing.Image.FromFile(imagePath);
+                            }));
+                        }
+                    }
+                }
+                else if ((message.Length >= Constants.OTHER.Length + Constants.CARD_UPDATE.Length && (message.Substring(0, Constants.OTHER.Length + Constants.CARD_UPDATE.Length) == Constants.MY + Constants.CARD_UPDATE)))
+                {
+                    string other_Front_Value = Constants.FRONT + message.Substring(Constants.OTHER.Length + Constants.CARD_UPDATE.Length) + ".jpg";
+                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", other_Front_Value);
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            vsFront_Card.Image = System.Drawing.Image.FromFile(imagePath);
+                        }));
+                    }
+                }
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message + " " + message);
+                MessageBox.Show(e.Message + "Error : " + message);
             }
         }
 
@@ -243,8 +325,8 @@ namespace TwofacedPoker_Client
             PacketHandler.SendPacket(socket, request);
             while (isRunning)
             {
-                 try
-                 {
+                try
+                {
                     string response = PacketHandler.ReceivePakcet(socket);
                     if (string.IsNullOrEmpty(response))
                     {
@@ -258,13 +340,13 @@ namespace TwofacedPoker_Client
                         isRunning = false;
                         break;
                     }
-                    else if (response.StartsWith(Constants.ROOM_EVENT)) 
+                    else if (response.StartsWith(Constants.ROOM_EVENT))
                     {
-                         RoomHandle(response.Substring(Constants.ROOM_EVENT.Length));
+                        RoomHandle(response.Substring(Constants.ROOM_EVENT.Length));
                     }
                     else if (response.StartsWith(Constants.GAME_CLIENT_EVENT))
                     {
-                         EventHandle(response.Substring(Constants.GAME_CLIENT_EVENT.Length));
+                        EventHandle(response.Substring(Constants.GAME_CLIENT_EVENT.Length));
                     }
                     else
                     {
@@ -276,20 +358,20 @@ namespace TwofacedPoker_Client
                             }));
                         }
                     }
-                 }
-                 catch (SocketException ex)
-                 {
-                     // 소켓 예외 처리
-                     MessageBox.Show("서버 연결이 끊어졌습니다: " + ex.Message);
-                     isRunning = false;
-                 } 
-                 catch (Exception ex)
-                 {
+                }
+                catch (SocketException ex)
+                {
+                    // 소켓 예외 처리
+                    MessageBox.Show("서버 연결이 끊어졌습니다: " + ex.Message);
+                    isRunning = false;
+                }
+                catch (Exception ex)
+                {
                     // 일반 예외 처리
                     MessageBox.Show("오류 발생: " + ex.Message);
                     isRunning = false;
-                 }
-             }
+                }
+            }
         }
 
         private void ExitButton_Click(object sender, EventArgs e)
@@ -322,6 +404,87 @@ namespace TwofacedPoker_Client
             Vs_Back_Chip.Text = "0";
             Dealer_Chip.Text = "0";
             bet_type = 0;
+        }
+
+        private void Bet_Chip_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (temp_bet_type == 0)
+                {
+                    MessageBox.Show("앞면 / 양면 / 뒷면 中 1개를 선택하여 주시길 바랍니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                int my_chips_count = this.chips;
+                int vs_chips_count = this.vs_chips;
+
+                if (my_chips_count < int.Parse(Bet_Chip_Count.Text))
+                {
+                    Bet_Chip_Count.Text = "";
+                    MessageBox.Show("현재 보유한 칩 보다 더 많은 숫자를 입력하였습니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (vs_chips_count < int.Parse(Bet_Chip_Count.Text))
+                {
+                    Bet_Chip_Count.Text = "";
+                    MessageBox.Show("상대가 보유한 칩보다 더 많은 숫자를 입력하였습니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                /*
+                string request = Constants.GAME_CLIENT_EVENT + Constants.
+                PacketHandler.SendPacket(socket, request);*/
+
+            }
+            catch (FormatException) 
+            {
+                Bet_Chip_Count.Text = "";
+                MessageBox.Show("유효하지 않은 값을 입력하였습니다. 숫자만 입력 해주시길 바랍니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+
+        private void Front_Bet_Button_Click(object sender, EventArgs e)
+        {
+            if (this.bet_type == 0)
+            {
+                Both_Bet_Button.Enabled = false;
+                Back_Bet_Button.Enabled = false;
+                temp_bet_type = 1;
+                System_Message.Text = "<System> : 앞면 베팅을 선택하였습니다. : ";
+            }
+        }
+
+        private void Both_Bet_Button_Click(object sender, EventArgs e)
+        {
+            if (this.bet_type == 0)
+            {
+                Front_Bet_Button.Enabled = false;
+                Back_Bet_Button.Enabled = false;
+                temp_bet_type = 2;
+                System_Message.Text = "<System> : 앙면 베팅을 선택하였습니다. : ";
+            }
+        }
+
+        private void Back_Bet_Button_Click(object sender, EventArgs e)
+        {
+            if (this.bet_type == 0)
+            {
+                Front_Bet_Button.Enabled = false;
+                Both_Bet_Button.Enabled = false;
+                temp_bet_type = 3;
+                System_Message.Text = "<System> : 뒷면 베팅을 선택하였습니다. : ";
+            }
+        }
+
+        private void Cancle_Button_Click(object sender, EventArgs e)
+        {
+            if (this.bet_type == 0)
+            {
+                Front_Bet_Button.Enabled = true;
+                Both_Bet_Button.Enabled = true;
+                Back_Bet_Button.Enabled = true;
+                temp_bet_type = 0;
+            }
         }
     }
 }

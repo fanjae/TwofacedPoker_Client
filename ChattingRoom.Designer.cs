@@ -35,8 +35,10 @@
             ExitButton = new Button();
             Vs_ID_Label = new Label();
             panel1 = new Panel();
+            Cancle_Button = new Button();
+            Die_Bet_Button = new Button();
             Bet_Chip = new Button();
-            Chip_count = new TextBox();
+            Bet_Chip_Count = new TextBox();
             Dealer_Label = new Label();
             panel6 = new Panel();
             Dealer_Chip = new Label();
@@ -138,8 +140,10 @@
             // panel1
             // 
             panel1.BackColor = Color.PaleGreen;
+            panel1.Controls.Add(Cancle_Button);
+            panel1.Controls.Add(Die_Bet_Button);
             panel1.Controls.Add(Bet_Chip);
-            panel1.Controls.Add(Chip_count);
+            panel1.Controls.Add(Bet_Chip_Count);
             panel1.Controls.Add(Dealer_Label);
             panel1.Controls.Add(panel6);
             panel1.Controls.Add(System_Message);
@@ -174,6 +178,29 @@
             panel1.Size = new Size(1493, 688);
             panel1.TabIndex = 7;
             // 
+            // Cancle_Button
+            // 
+            Cancle_Button.BackColor = Color.Ivory;
+            Cancle_Button.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Cancle_Button.Location = new Point(890, 510);
+            Cancle_Button.Name = "Cancle_Button";
+            Cancle_Button.Size = new Size(91, 107);
+            Cancle_Button.TabIndex = 34;
+            Cancle_Button.Text = "취소";
+            Cancle_Button.UseVisualStyleBackColor = false;
+            Cancle_Button.Click += Cancle_Button_Click;
+            // 
+            // Die_Bet_Button
+            // 
+            Die_Bet_Button.BackColor = Color.Ivory;
+            Die_Bet_Button.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Die_Bet_Button.Location = new Point(1017, 387);
+            Die_Bet_Button.Name = "Die_Bet_Button";
+            Die_Bet_Button.Size = new Size(91, 107);
+            Die_Bet_Button.TabIndex = 33;
+            Die_Bet_Button.Text = "포기";
+            Die_Bet_Button.UseVisualStyleBackColor = false;
+            // 
             // Bet_Chip
             // 
             Bet_Chip.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
@@ -183,14 +210,15 @@
             Bet_Chip.TabIndex = 8;
             Bet_Chip.Text = "베팅";
             Bet_Chip.UseVisualStyleBackColor = true;
+            Bet_Chip.Click += Bet_Chip_Click;
             // 
-            // Chip_count
+            // Bet_Chip_Count
             // 
-            Chip_count.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            Chip_count.Location = new Point(590, 636);
-            Chip_count.Name = "Chip_count";
-            Chip_count.Size = new Size(141, 45);
-            Chip_count.TabIndex = 8;
+            Bet_Chip_Count.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
+            Bet_Chip_Count.Location = new Point(590, 636);
+            Bet_Chip_Count.Name = "Bet_Chip_Count";
+            Bet_Chip_Count.Size = new Size(141, 45);
+            Bet_Chip_Count.TabIndex = 8;
             // 
             // Dealer_Label
             // 
@@ -227,11 +255,11 @@
             // 
             System_Message.AutoSize = true;
             System_Message.Font = new Font("맑은 고딕", 14F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            System_Message.Location = new Point(434, 27);
+            System_Message.Location = new Point(425, 27);
             System_Message.Name = "System_Message";
-            System_Message.Size = new Size(195, 38);
+            System_Message.Size = new Size(595, 38);
             System_Message.TabIndex = 28;
-            System_Message.Text = "<Message : >";
+            System_Message.Text = "<Message : 게임 진행은 여기서 출력됩니다.>";
             // 
             // label8
             // 
@@ -355,6 +383,7 @@
             Both_Bet_Button.TabIndex = 17;
             Both_Bet_Button.Text = "양면";
             Both_Bet_Button.UseVisualStyleBackColor = false;
+            Both_Bet_Button.Click += Both_Bet_Button_Click;
             // 
             // Back_Bet_Button
             // 
@@ -366,6 +395,7 @@
             Back_Bet_Button.TabIndex = 16;
             Back_Bet_Button.Text = "뒷면";
             Back_Bet_Button.UseVisualStyleBackColor = false;
+            Back_Bet_Button.Click += Back_Bet_Button_Click;
             // 
             // Front_Bet_Button
             // 
@@ -377,6 +407,7 @@
             Front_Bet_Button.TabIndex = 15;
             Front_Bet_Button.Text = "앞면";
             Front_Bet_Button.UseVisualStyleBackColor = false;
+            Front_Bet_Button.Click += Front_Bet_Button_Click;
             // 
             // vsFront_Card
             // 
@@ -634,7 +665,9 @@
         private Label Vs_Front_Chip;
         private Label Vs_Back_Chip;
         private Label label10;
-        private TextBox Chip_count;
+        private TextBox Bet_Chip_Count;
         private Button Bet_Chip;
+        private Button Die_Bet_Button;
+        private Button Cancle_Button;
     }
 }
