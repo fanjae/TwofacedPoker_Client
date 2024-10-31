@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,7 +27,7 @@ namespace TwofacedPoker_Client
         private int temp_bet_type;
         private int chips = 0;
         private int vs_chips = 0;
-
+        
         public ChattingRoom_Form(Socket socket, String roomName, String myID)
         {
             InitializeComponent();
@@ -256,7 +257,6 @@ namespace TwofacedPoker_Client
                             chips = int.Parse(chip_count);
                         }));
                     }
-
                 }
                 else if ((message.Length >= Constants.OTHER.Length + Constants.CHIP_UPDATE.Length && (message.Substring(0, Constants.OTHER.Length + Constants.CHIP_UPDATE.Length) == Constants.OTHER + Constants.CHIP_UPDATE)))
                 {
@@ -277,7 +277,7 @@ namespace TwofacedPoker_Client
                     string front_or_back = message.Substring(Constants.MY.Length + Constants.CARD_UPDATE.Length);
                     if (front_or_back.Length >= Constants.FRONT.Length && (front_or_back.Substring(0, Constants.FRONT.Length) == Constants.FRONT))
                     {
-                        valuePath = Constants.FRONT + front_or_back.Substring(Constants.FRONT.Length) + ".jpg";
+                        valuePath = "Front" + front_or_back.Substring(Constants.FRONT.Length) + ".jpg";
                         imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", valuePath);
                         if (InvokeRequired)
                         {
@@ -289,7 +289,7 @@ namespace TwofacedPoker_Client
                     }
                     else if (front_or_back.Length >= Constants.BACK.Length && (front_or_back.Substring(0, Constants.BACK.Length) == Constants.BACK))
                     {
-                        valuePath = Constants.BACK + front_or_back.Substring(Constants.BACK.Length) + ".jpg";
+                        valuePath = "Back" + front_or_back.Substring(Constants.BACK.Length) + ".jpg";
                         imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", valuePath);
                         if (InvokeRequired)
                         {
@@ -300,9 +300,9 @@ namespace TwofacedPoker_Client
                         }
                     }
                 }
-                else if ((message.Length >= Constants.OTHER.Length + Constants.CARD_UPDATE.Length && (message.Substring(0, Constants.OTHER.Length + Constants.CARD_UPDATE.Length) == Constants.MY + Constants.CARD_UPDATE)))
+                else if ((message.Length >= Constants.OTHER.Length + Constants.CARD_UPDATE.Length && (message.Substring(0, Constants.OTHER.Length + Constants.CARD_UPDATE.Length) == Constants.OTHER + Constants.CARD_UPDATE)))
                 {
-                    string other_Front_Value = Constants.FRONT + message.Substring(Constants.OTHER.Length + Constants.CARD_UPDATE.Length) + ".jpg";
+                    string other_Front_Value = "Front" + message.Substring(Constants.OTHER.Length + Constants.CARD_UPDATE.Length) + ".jpg";
                     string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "image", other_Front_Value);
                     if (InvokeRequired)
                     {
@@ -406,34 +406,78 @@ namespace TwofacedPoker_Client
             bet_type = 0;
         }
 
+        private int Get_my_bet_chip()
+        {
+            return Math.Max(int.Parse(My_Front_Chip.Text), int.Parse(My_Back_Chip.Text));
+        }
+        private int Get_vs_bet_chip()
+        {
+            return Math.Max(int.Parse(Vs_Front_Chip.Text), int.Parse(Vs_Back_Chip.Text));
+        }
+        private bool Can_bet(int chip_check)
+        {
+            int my_Chips_Count = this.chips;
+            int vs_Chips_Count = this.vs_chips;
+            int my_bet_chip_count = Get_my_bet_chip();
+            int vs_bet_chip_count = Get_vs_bet_chip();
+
+            if (temp_bet_type == 0)
+            {
+                Bet_Chip_Count.Text = "";
+                MessageBox.Show("앞면 / 양면 / 뒷면 中 1개를 선택하여 주시길 바랍니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            else if (temp_bet_type == 2 && (my_Chips_Count < chip_check * 2 || vs_Chips_Count < chip_check * 2))
+            {
+                Bet_Chip_Count.Text = "";
+                MessageBox.Show("자신 또는 상대가 보유한 칩 보다 더 많은 숫자를 입력하였습니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            else if (vs_bet_chip_count > my_bet_chip_count + chip_check)
+            {
+                Bet_Chip_Count.Text = "";
+                MessageBox.Show("상대가 베팅한 칩 개수 이상 베팅해야 합니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            else
+            {
+                if (my_Chips_Count < chip_check || vs_Chips_Count < chip_check)
+                {
+                    Bet_Chip_Count.Text = "";
+                    MessageBox.Show("본인 혹은 상대가 보유한 칩보다 더 많은 숫자를 입력하였습니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private void Bet_Chip_Click(object sender, EventArgs e)
         {
             try
             {
-                if (temp_bet_type == 0)
-                {
-                    MessageBox.Show("앞면 / 양면 / 뒷면 中 1개를 선택하여 주시길 바랍니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                int my_chips_count = this.chips;
-                int vs_chips_count = this.vs_chips;
+                int bet_Chip_Count_Value = int.Parse(Bet_Chip_Count.Text);
+                string game_type = "";
+                string request = "";
 
-                if (my_chips_count < int.Parse(Bet_Chip_Count.Text))
+                if (temp_bet_type == 1)
                 {
-                    Bet_Chip_Count.Text = "";
-                    MessageBox.Show("현재 보유한 칩 보다 더 많은 숫자를 입력하였습니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                if (vs_chips_count < int.Parse(Bet_Chip_Count.Text))
-                {
-                    Bet_Chip_Count.Text = "";
-                    MessageBox.Show("상대가 보유한 칩보다 더 많은 숫자를 입력하였습니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                /*
-                string request = Constants.GAME_CLIENT_EVENT + Constants.
-                PacketHandler.SendPacket(socket, request);*/
+                    game_type = Constants.FRONT;
 
+                }
+                else if (temp_bet_type == 2)
+                {
+                    game_type = Constants.BOTH;
+                }
+                else if (temp_bet_type == 3)
+                {
+                    game_type = Constants.BACK;
+                }
+
+                if (Can_bet(bet_Chip_Count_Value) == true)
+                {
+                    request = Constants.GAME_CLIENT_EVENT + Constants.BETTING + game_type + bet_Chip_Count_Value;
+                    PacketHandler.SendPacket(socket, request);
+                }
             }
             catch (FormatException) 
             {
