@@ -29,7 +29,8 @@ namespace TwofacedPoker_Client
         private int chips = 0;
         private int vs_chips = 0;
         private bool die;
-        private WindowsMediaPlayer wmp = new WindowsMediaPlayer();
+        private bool bet;
+        private AudioPlayer player;
 
         public ChattingRoom_Form(Socket socket, String roomName, String myID)
         {
@@ -45,6 +46,7 @@ namespace TwofacedPoker_Client
             this.chips = 0;
             this.vs_chips = 0;
             this.die = false;
+            this.bet = false;
 
 
             socket.SendTimeout = 0;
@@ -228,10 +230,17 @@ namespace TwofacedPoker_Client
                     string State = message.Substring(Constants.TURN.Length);
                     if (State == Constants.MY)
                     {
+                        if (player == null)
+                        {
+                            player = new AudioPlayer();
+                        }
+                        player.PlaySound("my_turn.mp3");
+
+                        /*
                         string currentDir = Directory.GetCurrentDirectory();
                         string soundFilePath = Path.Combine(currentDir, "sound", "my_turn.mp3");
                         wmp.URL = soundFilePath;
-                        wmp.controls.play();
+                        wmp.controls.play();*/
 
                         if (InvokeRequired)
                         {
@@ -247,7 +256,10 @@ namespace TwofacedPoker_Client
                                 if (this.bet_type == 0)
                                 {
                                     Front_Bet_Button.Enabled = true;
-                                    Both_Bet_Button.Enabled = true;
+                                    if (this.bothBetting == false)
+                                    {
+                                        Both_Bet_Button.Enabled = true;
+                                    }
                                     Back_Bet_Button.Enabled = true;
                                 }
                                 else if (this.bet_type == 1)
@@ -397,10 +409,6 @@ namespace TwofacedPoker_Client
                             }));
                         }
                     }
-                    else if (parse_message.Length >= Constants.BOTH.Length && (parse_message.Substring(0, Constants.BOTH.Length) == Constants.BOTH))
-                    {
-                        this.bet_type = 2;
-                    }
                 }
                 else if ((message.Length >= Constants.OTHER.Length + Constants.BET_UPDATE.Length && (message.Substring(0, Constants.OTHER.Length + Constants.BET_UPDATE.Length) == Constants.OTHER + Constants.BET_UPDATE)))
                 {
@@ -482,10 +490,17 @@ namespace TwofacedPoker_Client
                     bool game_end = false;
                     if (parse_message == Constants.WIN)
                     {
+                        /*
                         string currentDir = Directory.GetCurrentDirectory();
                         string soundFilePath = Path.Combine(currentDir, "sound", "win.mp3");
                         wmp.URL = soundFilePath;
-                        wmp.controls.play();
+                        wmp.controls.play();*/
+
+                        if (player == null)
+                        {
+                            player = new AudioPlayer();
+                        }
+                        player.PlaySound("win.mp3");
                         event_message = "<System> : 이번 베팅은 당신의 승리입니다.";
                     }
                     else if (parse_message == Constants.DRAW)
@@ -494,6 +509,11 @@ namespace TwofacedPoker_Client
                     }
                     else if (parse_message == Constants.LOSE)
                     {
+                        if (player == null)
+                        {
+                            player = new AudioPlayer();
+                        }
+                        player.PlaySound("lose.mp3");
                         event_message = "<System> : 이번 베팅은 당신의 패배입니다.";
                     }
                     else if (parse_message == Constants.DIE)
@@ -502,14 +522,29 @@ namespace TwofacedPoker_Client
                     }
                     else if (parse_message == Constants.BOTHWIN)
                     {
+                        if (player == null)
+                        {
+                            player = new AudioPlayer();
+                        }
+                        player.PlaySound("win.mp3");
                         event_message = "<System> : 양면 베팅에서 승리하였습니다. 칩 10개를 추가로 받습니다.";
                     }
                     else if (parse_message == Constants.BOTHLOSE)
                     {
+                        if (player == null)
+                        {
+                            player = new AudioPlayer();
+                        }
+                        player.PlaySound("lose.mp3");
                         event_message = "<System> : 앙면 베팅에서 패배하였습니다. 칩 10개를 패널티로 냅니다.";
                     }
                     else if (parse_message == Constants.FINALWIN)
                     {
+                        if (player == null)
+                        {
+                            player = new AudioPlayer();
+                        }
+                        player.PlaySound("final_win.mp3");
                         event_message = "<System> : 당신의 최종 승리로, 게임을 종료합니다.";
                         game_end = true;
                     }
@@ -564,20 +599,19 @@ namespace TwofacedPoker_Client
                 else if ((message.Length >= Constants.SPECIAL.Length) && (message.Substring(0, Constants.SPECIAL.Length) == Constants.SPECIAL))
                 {
                     string parse_message = message.Substring(Constants.SPECIAL.Length);
-                    string set_message;
                     string request;
-                    if (parse_message == "MY")
+                    if (parse_message == Constants.MY)
                     {
-                        set_message = "<System> : 베팅이 불가능하여 카드를 오픈합니다.";
+                        parse_message = "<System> : 베팅이 불가능하여 카드를 오픈합니다.";
                         if (IsSocketConnected(socket))
                         {
                             request = Constants.GAME_CLIENT_EVENT + Constants.BETTING + Constants.SPECIAL + 0;
                             PacketHandler.SendPacket(socket, request);
                         }
                     }
-                    else if (parse_message == "OTHER")
+                    else if (parse_message == Constants.OTHER)
                     {
-                        set_message = "<System> : 베팅이 불가능하여 카드를 오픈합니다.";
+                        parse_message = "<System> : 베팅이 불가능하여 카드를 오픈합니다.";
                     }
 
                     if (InvokeRequired)
@@ -676,13 +710,19 @@ namespace TwofacedPoker_Client
         }
         private void InitTableChipSetting()
         {
-            My_Front_Chip.Text = "0";
-            My_Back_Chip.Text = "0";
-            Vs_Front_Chip.Text = "0";
-            Vs_Back_Chip.Text = "0";
-            bet_type = 0;
-            temp_bet_type = 0;
-            bothBetting = false;
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    My_Front_Chip.Text = "0";
+                    My_Back_Chip.Text = "0";
+                    Vs_Front_Chip.Text = "0";
+                    Vs_Back_Chip.Text = "0";
+                    bet_type = 0;
+                    temp_bet_type = 0;
+                    bothBetting = false;
+                }));
+            }
         }
 
         private int Get_my_bet_chip()
@@ -706,7 +746,7 @@ namespace TwofacedPoker_Client
                 MessageBox.Show("앞면 / 양면 / 뒷면 中 1개를 선택하여 주시길 바랍니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-            else if (temp_bet_type == 2 && ((my_Chips_Count < chip_check * 2) || (vs_Chips_Count + vs_bet_chip_count < chip_check * 2 + my_bet_chip_count)))
+            else if (temp_bet_type == 2 && ((my_Chips_Count < chip_check * 2) || (vs_Chips_Count + vs_bet_chip_count < chip_check + my_bet_chip_count)))
             {
                 Bet_Chip_Count.Text = "";
                 MessageBox.Show("자신 또는 상대가 보유한 칩 보다 더 많은 숫자를 입력하였습니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -732,6 +772,7 @@ namespace TwofacedPoker_Client
 
         private void Bet_Chip_Click(object sender, EventArgs e)
         {
+            this.bet = true;
             try
             {
                 int bet_Chip_Count_Value = int.Parse(Bet_Chip_Count.Text);
@@ -758,11 +799,16 @@ namespace TwofacedPoker_Client
                     request = Constants.GAME_CLIENT_EVENT + Constants.BETTING + game_type + bet_Chip_Count_Value;
                     PacketHandler.SendPacket(socket, request);
                 }
+                else
+                {
+                    this.bet = false;
+                }
             }
             catch (FormatException)
             {
                 Bet_Chip_Count.Text = "";
                 MessageBox.Show("유효하지 않은 값을 입력하였습니다. 숫자만 입력 해주시길 바랍니다.", "베팅 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.bet = false;
                 return;
             }
         }
