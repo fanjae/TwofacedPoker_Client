@@ -41,4 +41,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+ <ItemGroup>
+  <None Update="image\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+ </ItemGroup>
 </Project>
