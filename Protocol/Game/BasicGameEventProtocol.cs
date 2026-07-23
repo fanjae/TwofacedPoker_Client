@@ -10,6 +10,7 @@ namespace TwofacedPoker_Client.Protocol.Game
         Turn,
         GameResult,
         GameInit,
+        GameAborted,
         Battle,
         Wait,
         BasicBetting,
@@ -55,6 +56,10 @@ namespace TwofacedPoker_Client.Protocol.Game
             if (message == Constants.GAME_INIT)
             {
                 return new BasicGameEventMessage(BasicGameEventType.GameInit, string.Empty);
+            }
+            if (message == Constants.GAME_ABORTED)
+            {
+                return new BasicGameEventMessage(BasicGameEventType.GameAborted,string.Empty);
             }
 
             if (message == Constants.BATTLE)

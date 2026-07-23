@@ -367,6 +367,10 @@ namespace TwofacedPoker_Client
                     HandleGameInit();
                     return true;
 
+                case BasicGameEventType.GameAborted:
+                    HandleGameAborted();
+                    return true;
+
                 case BasicGameEventType.Battle:
                     HandleBattle();
                     return true;
@@ -422,6 +426,56 @@ namespace TwofacedPoker_Client
                 default:
                     return false;
             }
+        }
+
+        private void HandleGameAborted()
+        {
+            // 진행 중이던 게임과 방의 준비 상태를 모두 폐기
+            gameState.ResetGame();
+            roomState.Reset();
+
+            // 화면에 남아 있는 칩 정보도 초기화
+            gameState.MyChips = 0;
+            gameState.OpponentChips = 0;
+
+            // 현재 판의 베팅 상태와 베팅 버튼 초기화
+            InitTableChipSetting();
+
+            // 생성자에서 사용한 기본 카드 이미지로 복구
+            SetCardImage(myFront_Card, "Front10.jpg");
+            SetCardImage(myBack_Card, "Back10.jpg");
+            SetCardImage(vsFront_Card, "Front10.jpg");
+
+            RunOnUiThread(() =>
+            {
+                System_Message.Text =
+                    "<System> : 상대방이 나가 게임이 중단되었습니다.";
+
+                // 준비 상태 초기화
+                My_Ready.Text = "<준비>";
+                Vs_Ready.Text = "<준비>";
+
+                // 상대방 정보 초기화
+                Vs_ID_Label.Text = "ID : ???";
+
+                // 보유 칩 및 공동 판돈 화면 초기화
+                My_Chip.Text = "0";
+                Vs_Chip.Text = "0";
+                Dealer_Chip.Text = "0";
+
+                // 턴 표시 제거
+                My_Turn.Visible = false;
+                Vs_Turn.Visible = false;
+
+                // 게임이 중단됐으므로 퇴장과 채팅을 다시 허용
+                ExitButton.Enabled = true;
+                SetChatEnabled(true);
+
+                chattingRoomTextBox.AppendText(
+                    "<System> : 상대방이 나가 게임이 중단되었습니다."
+                    + Environment.NewLine
+                );
+            });
         }
 
         private void AppendUnknownGameMessage(string message)
