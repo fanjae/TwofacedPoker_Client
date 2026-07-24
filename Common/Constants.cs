@@ -33,6 +33,7 @@ namespace TwofacedPoker_Client.Common
         public const string GAME_START = "Game_Start";
         public const string START = "Start ";
         public const string GAME_INIT = "Game_Init";
+        public const string GAME_ABORTED = "Game_Aborted";
         public const string TURN = "Turn ";
         public const string MY = "My";
         public const string OTHER = "Other";
