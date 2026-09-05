@@ -12,6 +12,7 @@ namespace TwofacedPoker_Client
         private Socket socket;
         private string myID;
         private Thread receiveThread;
+        private bool isInitialized;
 
         private volatile bool isRunning;
         private volatile bool isClosing;
@@ -23,7 +24,7 @@ namespace TwofacedPoker_Client
         private readonly ClientGameState gameState = new ClientGameState();
         private readonly ClientRoomState roomState = new ClientRoomState();
 
-        // 로비에서 사용하던 소케ㅐㅅ을 넘겨받아 동일한 서버 연결을 계속 사용
+        // 로비에서 사용하던 소켓을 넘겨받아 동일한 서버 연결을 계속 사용
         public ChattingRoom_Form(Socket socket,string roomName,string myID)
         {
             InitializeComponent();
@@ -43,15 +44,25 @@ namespace TwofacedPoker_Client
             myBack_Card.SizeMode = PictureBoxSizeMode.Zoom;
             vsFront_Card.SizeMode = PictureBoxSizeMode.Zoom;
 
+            My_ID_Label.Text = "ID : " + myID;
+
+            // Form이 화면에 표시된 뒤 핸들이 생성되면 초기화와 수신 스레드를 시작
+            Shown += ChattingRoom_Form_Shown;
+        }
+
+        private void ChattingRoom_Form_Shown(object? sender, EventArgs e)
+        {
+            if (isInitialized || isClosing || IsDisposed)
+            {
+                return;
+            }
+
+            isInitialized = true;
+
+            // Form 핸들이 생성된 뒤 기본 카드 이미지를 설정
             SetCardImage(myFront_Card, "Front10.jpg");
             SetCardImage(vsFront_Card, "Front10.jpg");
             SetCardImage(myBack_Card, "Back10.jpg");
-
-            My_ID_Label.Text = "ID : " + myID;
-
-            sendTextBox.Select(sendTextBox.Text.Length,0);
-
-            sendTextBox.ScrollToCaret();
 
             // UI 스레드가 멈추지 않도록 백그라운드 스레드에서 계속 처리
             receiveThread = new Thread(Receive)
@@ -101,6 +112,10 @@ namespace TwofacedPoker_Client
                 }
 
                 action();
+            }
+            catch (ObjectDisposedException)
+            {
+                // 폼이 이미 Dispose된 경우
             }
             catch (InvalidOperationException)
             {
