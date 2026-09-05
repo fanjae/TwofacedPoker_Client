@@ -53,6 +53,7 @@ port=9190
 ## 주요 기능
 
 ### 로비 및 방 관리
+<img width="2000" height="1300" alt="2 GameLobby" src="https://github.com/user-attachments/assets/608c75c2-ee82-452e-8278-fcbb5175aaf9" />
 
 - 서버 접속 및 클라이언트 ID 할당
 - 서버의 최신 방 목록 조회
@@ -62,6 +63,7 @@ port=9190
 - 게임 중 임의 퇴장 제한
 
 ### 게임 시스템
+<img width="3274" height="2056" alt="image" src="https://github.com/user-attachments/assets/9ad2c9ee-c339-4e48-992d-a6b932b9db27" />
 
 - 2인 턴 기반 게임 진행
 - 내 카드의 앞면·뒷면 및 상대 카드 표시
@@ -70,6 +72,7 @@ port=9190
 - 상대의 뒷면 카드 공개 이벤트 처리
 
 ### 베팅 시스템
+<img width="3274" height="2056" alt="image" src="https://github.com/user-attachments/assets/12df6d87-59b7-4b8b-b133-3b4e84fcdd16" />
 
 - 앞면(Front), 뒷면(Back), 양면(Both) 베팅
 - 베팅 금액 입력 및 취소
