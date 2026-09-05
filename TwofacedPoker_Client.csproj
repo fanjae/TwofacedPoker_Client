@@ -42,8 +42,19 @@
   </ItemGroup>
 
  <ItemGroup>
-  <None Update="image\**\*">
+  <None Update="server.ini">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
   </None>
- </ItemGroup>
+
+  <None Update="Image\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+  </None>
+
+  <None Update="sound\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+  </None>
+</ItemGroup>
 </Project>
