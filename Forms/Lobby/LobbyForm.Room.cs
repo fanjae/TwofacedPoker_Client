@@ -101,6 +101,13 @@ namespace TwofacedPoker_Client
                     return PacketHandler.ReceivePacket(currentSocket);
                 });
 
+                // 방 생성 성공 응답으로 받은 방 번호가 정수인지 먼저 확인
+                if (!int.TryParse(roomNumber, out _))
+                {
+                    MessageBox.Show("방 생성에 실패했습니다. 서버 응답: " + roomNumber,"방 생성 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 MessageBox.Show("방 생성이 완료되었습니다.", "방 생성 성공", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 AppendLog("방을 생성했습니다.");
 
