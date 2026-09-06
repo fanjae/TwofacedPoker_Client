@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net.Sockets;
+using System.Threading.Channels;
 using TwofacedPoker_Client.Common;
 using TwofacedPoker_Client.Game;
 using TwofacedPoker_Client.Protocol;
@@ -23,6 +24,17 @@ namespace TwofacedPoker_Client
         private AudioPlayer? player;
         private readonly ClientGameState gameState = new ClientGameState();
         private readonly ClientRoomState roomState = new ClientRoomState();
+
+        // 서버 게임 이벤트를 수신 순서대로 보관하여 연출이 서로 덮어쓰이지 않게 처리
+        private readonly Channel<string> presentationQueue = Channel.CreateUnbounded<string>(new UnboundedChannelOptions
+        {
+            SingleReader = true,
+            SingleWriter = false
+        });
+
+        // 폼 종료 시 대기 중인 연출 작업과 Task.Delay를 중단하기 위한 취소 토큰
+        private readonly CancellationTokenSource presentationCancellation = new();
+        private Task? presentationWorker;
 
         // 로비에서 사용하던 소켓을 넘겨받아 동일한 서버 연결을 계속 사용
         public ChattingRoom_Form(Socket socket,string roomName,string myID)
@@ -65,6 +77,14 @@ namespace TwofacedPoker_Client
             SetCardImage(myBack_Card, "Back10.jpg");
 
             // UI 스레드가 멈추지 않도록 백그라운드 스레드에서 계속 처리
+            receiveThread = new Thread(Receive)
+            {
+                IsBackground = true
+            };
+
+            // UI 스레드를 차단하지 않도록 게임 이벤트 연출을 별도 작업에서 순차 처리
+            presentationWorker = Task.Run(() => RunPresentationQueueAsync(presentationCancellation.Token));
+
             receiveThread = new Thread(Receive)
             {
                 IsBackground = true
@@ -141,6 +161,34 @@ namespace TwofacedPoker_Client
 
                 oldImage?.Dispose();
             });
+        }
+
+        // 수신 스레드에서 직접 UI를 변경하지 않고 연출 큐에 이벤트를 추가
+        private void EnqueuePresentation(string message)
+        {
+            if (isClosing)
+            {
+                return;
+            }
+
+            presentationQueue.Writer.TryWrite(message);
+        }
+
+        // 단일 소비자가 이벤트를 하나씩 처리하여 서버 이벤트 순서와 화면 연출 순서를 일치시킴
+        private async Task RunPresentationQueueAsync(CancellationToken token)
+        {
+            try
+            {
+                await foreach (string message in
+                    presentationQueue.Reader.ReadAllAsync(token))
+                {
+                    await ProcessGameEventAsync(message, token);
+                }
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                // 폼 종료 시 정상적으로 연출 큐를 중단
+            }
         }
     }
 }

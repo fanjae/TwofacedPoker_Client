@@ -35,6 +35,9 @@ namespace TwofacedPoker_Client
             }
 
             isClosing = true;
+
+            presentationCancellation.Cancel();
+            presentationQueue.Writer.TryComplete();
             ExitButton.Enabled = false;
 
             try
