@@ -66,11 +66,15 @@
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(820, 98);
+            ClientSize = new Size(820, 112);
             Controls.Add(CreateRoomButton);
             Controls.Add(roomNameTextBox);
             Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MaximizeBox = false;
+            MinimizeBox = false;
             Name = "CreateRoom";
+            StartPosition = FormStartPosition.CenterParent;
             Text = "CreateRoom";
             ResumeLayout(false);
             PerformLayout();
