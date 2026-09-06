@@ -41,6 +41,13 @@ namespace TwofacedPoker_Client
         {
             InitializeComponent();
 
+            // 방 창은 최초 실행 시 화면 중앙에 배치하되, 사용자가 제목 표시줄로 자유롭게 이동할 수 있도록 처리
+            StartPosition = FormStartPosition.CenterScreen;
+
+            // 화면보다 큰 게임 UI도 스크롤을 통해 전체 영역에 접근할 수 있도록 최소 스크롤 영역 지정
+            AutoScroll = true;
+            AutoScrollMinSize = new Size(2466, 736);
+
             this.socket = socket;
             this.myID = myID;
 
