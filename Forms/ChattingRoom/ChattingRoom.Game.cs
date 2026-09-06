@@ -10,10 +10,27 @@ namespace TwofacedPoker_Client
         // 게임 패킷을 기본 이벤트, 칩/카드 이벤트, 베팅 이벤트 순서대로 처리
         private void EventHandle(string message)
         {
+            EnqueuePresentation(message);
+        }
+
+        // 큐에서 꺼낸 게임 이벤트를 기존 게임 이벤트 처리 순서에 맞춰 실행
+        private async Task ProcessGameEventAsync(string message,CancellationToken token)
+        {
             try
             {
+                ChipAndCardEventMessage chipEvent =
+                    ChipAndCardEventParser.Parse(message);
+
+                // 상대 뒷면 카드 공개는 중간 문구와 실제 카드 표시를 분리
+                if (chipEvent.Type == ChipAndCardEventType.OpponentCardPrint)
+                {
+                    await HandleOpponentCardPrintAsync(chipEvent.Value, token);
+                    return;
+                }
+
                 if (HandleBasicGameEvent(message))
                 {
+                    await DelayForPresentationAsync(message, token);
                     return;
                 }
 
@@ -29,12 +46,36 @@ namespace TwofacedPoker_Client
 
                 AppendUnknownGameMessage(message);
             }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                // 폼 종료 시 정상적으로 중단
+            }
             catch (Exception ex)
             {
                 RunOnUiThread(() =>
                 {
-                    MessageBox.Show(ex.Message + Environment.NewLine + "수신 메시지: " + message, "패킷 처리 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message + Environment.NewLine + "수신 메시지: " + message,"패킷 처리 오류",MessageBoxButtons.OK,MessageBoxIcon.Error);
                 });
+            }
+        }
+
+        // 모든 패킷을 지연시키지 않고, 사용자가 확인해야 하는 주요 게임 단계에만 연출 시간을 적용
+        private static async Task DelayForPresentationAsync(string message,CancellationToken token)
+        {
+            BasicGameEventMessage gameEvent =
+                BasicGameEventParser.Parse(message);
+
+            int delayMilliseconds = gameEvent.Type switch
+            {
+                BasicGameEventType.Battle => 800,
+                BasicGameEventType.GameResult => 1500,
+                BasicGameEventType.Wait => 1000,
+                _ => 0
+            };
+
+            if (delayMilliseconds > 0)
+            {
+                await Task.Delay(delayMilliseconds, token);
             }
         }
 
@@ -292,17 +333,23 @@ namespace TwofacedPoker_Client
             
         }
 
-        private void HandleOpponentCardPrint(string cardValue)
+        // 공개 안내 문구와 실제 카드 결과를 분리하여 사용자가 카드 공개 과정을 인지하도록 처리
+        private async Task HandleOpponentCardPrintAsync(string cardValue,CancellationToken token)
         {
             RunOnUiThread(() =>
             {
-                System_Message.Text = "<System> : 상대의 뒷면 카드를 공개합니다. ";
+                System_Message.Text = "<System> : 상대의 뒷면 카드를 공개합니다.";
             });
+
+            await Task.Delay(1000, token);
 
             RunOnUiThread(() =>
             {
-                System_Message.Text = "<System> : 상대의 뒷면카드는 " + cardValue + "입니다.";
+                System_Message.Text ="<System> : 상대의 뒷면카드는 " + cardValue + "입니다.";
             });
+
+            // 실제 카드 값도 잠시 유지
+            await Task.Delay(1000, token);
         }
 
         private void HandleWait()
@@ -417,10 +464,6 @@ namespace TwofacedPoker_Client
 
                 case ChipAndCardEventType.DealerChipUpdate:
                     UpdateDealerChip(gameEvent.Value);
-                    return true;
-
-                case ChipAndCardEventType.OpponentCardPrint:
-                    HandleOpponentCardPrint(gameEvent.Value);
                     return true;
 
                 default:
